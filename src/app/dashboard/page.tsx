@@ -18,15 +18,16 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    fetchProjects();
-
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUserName(user.user_metadata?.full_name || user.email || '');
+      if (!user) {
+        router.replace('/login');
+        return;
       }
+      setUserName(user.user_metadata?.full_name || user.email || '');
+      fetchProjects();
     });
-  }, [fetchProjects]);
+  }, [fetchProjects, router]);
 
   async function handleCreateProject(e: React.FormEvent) {
     e.preventDefault();

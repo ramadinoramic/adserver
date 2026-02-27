@@ -25,27 +25,9 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const user = session?.user ?? null;
-
-  const url = request.nextUrl.clone();
-  const pathname = url.pathname;
-
-  const protectedPaths = ['/dashboard', '/editor'];
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
-
-  if (!user && isProtected) {
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  if (user && (pathname === '/login' || pathname === '/register')) {
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
+  // Refresh session if expired — required for Server Components to work.
+  // Auth redirects are handled client-side in the dashboard/editor pages.
+  await supabase.auth.getSession();
 
   return supabaseResponse;
 }

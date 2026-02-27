@@ -1,68 +1,47 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-      },
+    // Create user via admin API (skips email confirmation)
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, fullName }),
     });
 
-    if (error) {
-      setError(error.message);
+    const json = await res.json();
+
+    if (!res.ok) {
+      setError(json.error || 'Registration failed');
       setLoading(false);
       return;
     }
 
-    if (data.user && !data.session) {
-      setSuccess(true);
-    } else {
-      router.push('/dashboard');
-      router.refresh();
-    }
-    setLoading(false);
-  }
+    // Sign in immediately since email is already confirmed
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-text-primary mb-2">Check your email</h2>
-          <p className="text-text-secondary">
-            We&apos;ve sent a confirmation email to <strong className="text-text-primary">{email}</strong>.
-            Click the link in the email to activate your account.
-          </p>
-          <Link href="/login" className="btn-primary inline-block mt-6">
-            Back to Sign In
-          </Link>
-        </div>
-      </div>
-    );
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+      return;
+    }
+
+    window.location.href = '/dashboard';
   }
 
   return (
