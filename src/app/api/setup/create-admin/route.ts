@@ -14,10 +14,21 @@ export async function GET() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data, error } = await supabase.auth.admin.createUser({
-    email: 'dinoramitch@gmail.com',
-    password: 'dino1002',
+  // Find existing user by email
+  const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
+  if (listError) {
+    return NextResponse.json({ error: listError.message }, { status: 400 });
+  }
+
+  const existingUser = listData.users.find((u) => u.email === 'dinoramitch@gmail.com');
+  if (!existingUser) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Confirm email and update password
+  const { data, error } = await supabase.auth.admin.updateUserById(existingUser.id, {
     email_confirm: true,
+    password: 'dino1002',
   });
 
   if (error) {
