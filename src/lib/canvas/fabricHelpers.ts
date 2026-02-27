@@ -84,6 +84,8 @@ export async function addTextToCanvas(
   canvas.add(text);
   canvas.setActiveObject(text);
   canvas.renderAll();
+  text.enterEditing();
+  text.selectAll();
   return text;
 }
 

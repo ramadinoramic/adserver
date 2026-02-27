@@ -68,7 +68,7 @@ export function CanvasControls({
 
       {/* Zoom controls */}
       <button
-        onClick={() => canvasHook?.zoomOut()}
+        onClick={() => setZoom(Math.max(0.1, zoom / 1.2))}
         title="Zoom out"
         className="btn-ghost p-1.5"
       >
@@ -80,7 +80,7 @@ export function CanvasControls({
       </span>
 
       <button
-        onClick={() => canvasHook?.zoomIn()}
+        onClick={() => setZoom(Math.min(5, zoom * 1.2))}
         title="Zoom in"
         className="btn-ghost p-1.5"
       >

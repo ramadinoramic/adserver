@@ -134,7 +134,7 @@ export default function EditorPage() {
           {/* Panel content */}
           <div className="w-64 bg-surface border-l border-border flex flex-col overflow-hidden">
             <div className="panel-slide-in flex-1 flex flex-col overflow-hidden">
-              {activeRightPanel === 'properties' && <PropertiesPanel />}
+              {activeRightPanel === 'properties' && <PropertiesPanel canvasHook={canvasHook} />}
               {activeRightPanel === 'sizes' && <SizePanel />}
               {activeRightPanel === 'layers' && <LayersPanel />}
               {activeRightPanel === 'compliance' && <ComplianceChecker />}
